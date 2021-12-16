@@ -27,6 +27,7 @@ jobs:
     steps:
 #      - uses: actions/checkout@v2
       - name: Download version.txt
+        uses: actions/download-artifact@v2
         with:
           name: version
       - shell: bash
@@ -52,6 +53,7 @@ jobs:
     steps:
 #      - uses: actions/checkout@v2
       - name: Download version.txt
+        uses: actions/download-artifact@v2
         with:
           name: version
       - shell: bash
