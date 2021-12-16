@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 #      - uses: actions/checkout@v2
-      - shell: bash
+      - name: Write version.txt
         run: |
           echo "1.0.0" > version.txt
       - name: Upload version.txt
@@ -30,14 +30,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: version
-      - shell: bash
+      - name: Check version.txt
         run: |
           version=$(cat version.txt)
           if [[ "$version" != *"-"* ]]
           then
             echo "Version $version is a release version."
           fi
-      - shell: bash
+      - name: Write version.txt again
         run: |
           echo "1.0.1-SNAPSHOT" > version.txt
       - name: Upload version.txt
@@ -56,7 +56,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: version
-      - shell: bash
+      - name: Check version.txt
         run: |
           version=$(cat version.txt)
           if [[ "$version" == *"-"* ]]
