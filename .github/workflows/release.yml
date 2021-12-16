@@ -12,7 +12,8 @@ on:
 #    types:
 #      - created
   schedule:
-    - cron: '*/10 * * * *'
+#    - cron: '*/10 * * * *'
+    - cron: '45 0 * * THU'
 #    - cron: '45 15 * * MON'
 
   # Allows you to run this workflow manually from the Actions tab
