@@ -21,7 +21,7 @@ jobs:
           path: version.txt
 
   check-release:
-    name: Check version.txt contains release
+    name: Check release
     needs: upload-version
     runs-on: ubuntu-latest
     steps:
@@ -46,8 +46,8 @@ jobs:
           name: version
           path: version.txt
 
-  recheck-snapshot:
-    name: Check version.txt contains snapshot
+  check-pre-release:
+    name: Check pre-release
     needs: check-release
     runs-on: ubuntu-latest
     steps:
