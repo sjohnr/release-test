@@ -1,0 +1,65 @@
+name: Wait
+
+on:
+  schedule:
+    - cron: '*/10 * * * THUR'
+  workflow_dispatch:
+
+jobs:
+  upload-version:
+    name: Upload version.txt
+    runs-on: ubuntu-latest
+    steps:
+#      - uses: actions/checkout@v2
+      - shell: bash
+        run: |
+          echo "1.0.0" > version.txt
+      - name: Upload version.txt
+        uses: actions/upload-artifact@v2
+        with:
+          name: version
+          path: version.txt
+
+  check-release:
+    name: Check version.txt contains release
+    needs: upload-version
+    runs-on: ubuntu-latest
+    steps:
+#      - uses: actions/checkout@v2
+      - name: Download version.txt
+        with:
+          name: version
+      - shell: bash
+        run: |
+          version=$(cat version.txt)
+          if [[ "$version" != *"-"* ]]
+          then
+            echo "Version $version is a release version."
+          fi
+      - shell: bash
+        run: |
+          echo "1.0.1-SNAPSHOT" > version.txt
+      - name: Upload version.txt
+        uses: actions/upload-artifact@v2
+        with:
+          name: version
+          path: version.txt
+
+  recheck-snapshot:
+    name: Check version.txt contains snapshot
+    needs: check-release
+    runs-on: ubuntu-latest
+    steps:
+#      - uses: actions/checkout@v2
+      - name: Download version.txt
+        with:
+          name: version
+      - shell: bash
+        run: |
+          version=$(cat version.txt)
+          if [[ "$version" == *"-"* ]]
+          then
+            echo "Version $version is a snapshot version."
+          else
+            echo "Version $version is not a snapshot version. Check it."
+          fi
