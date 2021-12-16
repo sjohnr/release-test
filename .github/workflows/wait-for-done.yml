@@ -1,8 +1,8 @@
-name: Wait
+name: Wait For Done
 
 on:
   schedule:
-    - cron: '*/10 * * * THUR'
+    - cron: '*/10 * * * THU'
   workflow_dispatch:
 
 jobs:
