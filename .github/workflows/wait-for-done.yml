@@ -61,7 +61,7 @@ jobs:
           version=$(cat version.txt)
           if [[ "$version" == *"-"* ]]
           then
-            echo "Version $version is a snapshot version."
+            echo "Version $version is a pre-release version."
           else
-            echo "Version $version is not a snapshot version. Check it."
+            echo "Version $version is not a pre-release version."
           fi
