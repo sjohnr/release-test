@@ -2,7 +2,7 @@ name: Wait For Done
 
 on:
   schedule:
-    - cron: '*/10 * * * THU'
+    - cron: '45 23 * * THU'
   workflow_dispatch:
 
 jobs:
