@@ -31,7 +31,7 @@ jobs:
           repo=${{ github.repository }}
           branch=${{ github.ref_name }}
           version=${{ env.project_version }}
-          access_token=${{ secrets.GITHUB_ACCESS_TOKEN }}
+          access_token=${{ secrets.GH_ACTIONS_REPO_TOKEN }}
           echo "Performing release of $repo/$version."
           until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
           do
