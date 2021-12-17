@@ -13,7 +13,7 @@ jobs:
 #      - uses: actions/checkout@v2
       - name: Write version.txt
         run: |
-          echo "1.0.0" > version.txt
+          echo "5.7.0" > version.txt
       - name: Upload version.txt
         uses: actions/upload-artifact@v2
         with:
@@ -36,10 +36,21 @@ jobs:
           if [[ "$version" != *"-"* ]]
           then
             echo "Version $version is a release version."
+            until curl -f -s --show-error https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
+            do
+              sleep 10
+              echo "."
+            done
+            echo "Finished"
           fi
+#      - name: Uptime Action
+#        uses: srt32/uptime@v0.2.1
+#        with:
+#          url-to-hit: "https://example.com"
+#          expected-statuses: "200,301"
       - name: Write version.txt again
         run: |
-          echo "1.0.1-SNAPSHOT" > version.txt
+          echo "5.7.1-SNAPSHOT" > version.txt
       - name: Upload version.txt
         uses: actions/upload-artifact@v2
         with:
