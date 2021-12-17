@@ -17,13 +17,13 @@ jobs:
         name: Extract version
         run: |
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
-          echo "::debug::Setting version=$version"
-          echo "::set-output name=version::$version"
+          echo "Setting version=$version"
+          echo "project_version=$version" >> $GITHUB_ENV
 #          if [[ "$version" != *"-SNAPSHOT"* ]]
 #          then
 #          fi
       - name: perform-release
-        if: ${{ !endsWith(steps.extract-version.outputs.version, '-SNAPSHOT') }}
+        if: ${{ !endsWith(env.project_version, '-SNAPSHOT') }}
         run: |
-          version=${{ steps.extract-version.outputs.version }}
+          version=${{ env.project_version }}
           echo "Version $version is a release version."
