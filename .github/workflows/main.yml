@@ -30,4 +30,4 @@ jobs:
         name: Perform release
         if: ${{ env.perform_release }}
         run: |
-          echo "Performing release of ${{ github.repository }}/${{ github.repository_owner }}/${{ env.project_version }}."
+          echo "Performing release of ${{ github.repository }}/${{ env.project_version }}."
