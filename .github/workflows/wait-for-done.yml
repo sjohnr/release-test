@@ -36,10 +36,10 @@ jobs:
           if [[ "$version" != *"-"* ]]
           then
             echo "Version $version is a release version."
-            until curl -f -s --show-error https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
+            until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
             do
               sleep 10
-              echo "."
+              echo -n "."
             done
             echo "Finished"
           fi
