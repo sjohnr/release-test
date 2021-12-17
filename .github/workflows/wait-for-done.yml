@@ -39,7 +39,7 @@ jobs:
             until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
             do
               sleep 10
-              echo -n "."
+              echo "."
             done
             echo "Finished"
           fi
