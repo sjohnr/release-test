@@ -28,19 +28,19 @@ jobs:
         run: |
           echo "Setting env.perform_release=true"
           echo "perform_release=true" >> $GITHUB_ENV
-      - name: Perform release
+      - name: Wait for Maven Artifacts
         if: ${{ env.perform_release }}
         env:
           REPO: ${{ github.repository }}
           VERSION: ${{ env.project_version }}
         run: |
-          echo "Performing release of $REPO/$VERSION."
+          echo "Performing release of $REPO@$VERSION."
           until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
             echo "."
           done
-          echo "Artifacts for $REPO/$VERSION have been released to Maven Central."
+          echo "Artifacts for $REPO@$VERSION have been released to Maven Central."
       - name: Create GitHub Release
         if: ${{ env.perform_release }}
         env:
@@ -49,5 +49,5 @@ jobs:
           TOKEN: ${{ github.token }}
           VERSION: ${{ env.project_version }}
         run: |
-          echo "Tagging and publishing $REPO/$VERSION release to GitHub."
+          echo "Tagging and publishing $REPO@$VERSION release to GitHub."
           echo "./gradlew createGitHubRelease -PnextVersion=$VERSION -Pbranch=$BRANCH -PcreateRelease=true -PgitHubAccessToken=$TOKEN"
