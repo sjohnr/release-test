@@ -24,10 +24,20 @@ jobs:
         if: ${{ !endsWith(env.project_version, '-SNAPSHOT') }}
         run: |
           echo "perform_release=true" >> $GITHUB_ENV
-          version=${{ env.project_version }}
-          echo "Version $version is a release version."
       - id: perform-release
         name: Perform release
         if: ${{ env.perform_release }}
         run: |
-          echo "Performing release of ${{ github.repository }}/${{ env.project_version }}."
+          repo=${{ github.repository }}
+          branch=${{ github.ref_name }}
+          version=${{ env.project_version }}
+          access_token=${{ secrets.GITHUB_ACCESS_TOKEN }}
+          echo "Performing release of $repo/$version."
+          until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
+          do
+            sleep 30
+            echo "."
+          done
+          echo "Artifacts for $repo/$version have been released to Maven Central."
+          echo "Tagging and publishing $repo/$version release to GitHub."
+          echo "./gradlew createGitHubRelease -PnextVersion=$version -Pbranch=$branch -PcreateRelease=true -PgitHubAccessToken=$access_token"
