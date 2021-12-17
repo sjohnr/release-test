@@ -30,20 +30,24 @@ jobs:
           echo "perform_release=true" >> $GITHUB_ENV
       - name: Perform release
         if: ${{ env.perform_release }}
+        env:
+          REPO: ${{ github.repository }}
+          VERSION: ${{ env.project_version }}
         run: |
-          repo=${{ github.repository }}
-          branch=${{ github.ref_name }}
-          version=${{ env.project_version }}
-          access_token=${{ secrets.GH_ACTIONS_REPO_TOKEN }}
-          echo "Performing release of $repo/$version."
-          until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$version/ > /dev/null
+          echo "Performing release of $REPO/$VERSION."
+          until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
             echo "."
           done
-          echo "Artifacts for $repo/$version have been released to Maven Central."
+          echo "Artifacts for $REPO/$VERSION have been released to Maven Central."
       - name: Create GitHub Release
         if: ${{ env.perform_release }}
+        env:
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          TOKEN: ${{ github.token }}
+          VERSION: ${{ env.project_version }}
         run: |
-          echo "Tagging and publishing $repo/$version release to GitHub."
-          echo "./gradlew createGitHubRelease -PnextVersion=$version -Pbranch=$branch -PcreateRelease=true -PgitHubAccessToken=$access_token"
+          echo "Tagging and publishing $REPO/$VERSION release to GitHub."
+          echo "./gradlew createGitHubRelease -PnextVersion=$VERSION -Pbranch=$BRANCH -PcreateRelease=true -PgitHubAccessToken=$TOKEN"
