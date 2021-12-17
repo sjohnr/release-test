@@ -1,8 +1,8 @@
 name: CI
 
 on:
-#  push:
-#    branches: [ main ]
+  push:
+    branches: [ main ]
 #    tags: [ .* ]
 #  pull_request:
 #    branches: [ main ]
@@ -13,5 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: perform-release
+        run: |
+          version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
+          if [[ "$version" != *"-"* ]]
+          then
+            echo "Version $version is a release version."
+            // wait for done
+          else
+            echo "Version $version is not a release version."
+          fi
