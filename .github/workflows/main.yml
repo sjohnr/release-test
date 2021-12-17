@@ -14,18 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - id: build
-        name: Build project
+      - name: Build project
         run: |
           echo "Building project..."
-      - id: extract-version
-        name: Extract version
+      - name: Extract version
         run: |
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
           echo "Setting env.project_version=$version"
           echo "project_version=$version" >> $GITHUB_ENV
-      - id: set-perform-release
-        name: Set perform release flag
+      - name: Set perform release flag
         if: ${{ !endsWith(env.project_version, '-SNAPSHOT') }}
         run: |
           echo "Setting env.perform_release=true"
@@ -39,8 +36,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v2
-      - id: perform-release
-        name: Perform release
+      - name: Perform release
         run: |
           repo=${{ github.repository }}
           branch=${{ github.ref_name }}
@@ -61,8 +57,7 @@ jobs:
     if: ${{ env.perform_release }}
     steps:
       - uses: actions/checkout@v2
-      - id: create-github-release
-        name: Create GitHub Release
+      - name: Create GitHub Release
         run: |
           echo "Tagging and publishing $repo/$version release to GitHub."
           echo "./gradlew createGitHubRelease -PnextVersion=$version -Pbranch=$branch -PcreateRelease=true -PgitHubAccessToken=$access_token"
