@@ -17,12 +17,13 @@ jobs:
         name: Extract version
         run: |
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
-          echo "Setting version=$version"
+          echo "Setting env.project_version=$version"
           echo "project_version=$version" >> $GITHUB_ENV
       - id: set-perform-release
         name: Set perform release flag
         if: ${{ !endsWith(env.project_version, '-SNAPSHOT') }}
         run: |
+          echo "Setting env.perform_release=true"
           echo "perform_release=true" >> $GITHUB_ENV
       - id: perform-release
         name: Perform release
