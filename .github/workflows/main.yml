@@ -32,11 +32,11 @@ jobs:
     name: Wait for Artifacts
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ env.perform_release }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v2
       - name: Perform release
+        if: ${{ env.perform_release }}
         run: |
           repo=${{ github.repository }}
           branch=${{ github.ref_name }}
@@ -54,10 +54,10 @@ jobs:
     name: Post Release
     runs-on: ubuntu-latest
     needs: wait-for-artifacts
-    if: ${{ env.perform_release }}
     steps:
       - uses: actions/checkout@v2
       - name: Create GitHub Release
+        if: ${{ env.perform_release }}
         run: |
           echo "Tagging and publishing $repo/$version release to GitHub."
           echo "./gradlew createGitHubRelease -PnextVersion=$version -Pbranch=$branch -PcreateRelease=true -PgitHubAccessToken=$access_token"
