@@ -19,11 +19,15 @@ jobs:
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
           echo "Setting version=$version"
           echo "project_version=$version" >> $GITHUB_ENV
-#          if [[ "$version" != *"-SNAPSHOT"* ]]
-#          then
-#          fi
-      - name: perform-release
+      - id: set-perform-release
+        name: Set perform release flag
         if: ${{ !endsWith(env.project_version, '-SNAPSHOT') }}
         run: |
+          echo "perform_release=true" >> $GITHUB_ENV
           version=${{ env.project_version }}
           echo "Version $version is a release version."
+      - id: perform-release
+        name: Perform release
+        if: ${{ env.perform_release }}
+        run: |
+          echo "Performing release of ${{ github.repository }}/${{ github.repository_owner }}/${{ env.project_version }}."
