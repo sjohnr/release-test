@@ -13,13 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: perform-release
+      - id: extract-version
+        name: Extract version
         run: |
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
-          if [[ "$version" != *"-"* ]]
-          then
-            echo "Version $version is a release version."
-            // wait for done
-          else
-            echo "Version $version is not a release version."
-          fi
+          echo "::debug::Setting version=$version"
+          echo "::set-output name=version::$version"
+#          if [[ "$version" != *"-SNAPSHOT"* ]]
+#          then
+#          fi
+      - name: perform-release
+        if: ${{ !endsWith(steps.extract-version.outputs.version, '-SNAPSHOT') }}
+        run: |
+          version=${{ steps.extract-version.outputs.version }}
+          echo "Version $version is a release version."
