@@ -63,6 +63,7 @@ jobs:
           echo "perform_release=true" >> $GITHUB_ENV
   release:
     name: Perform Release
+    needs: [prerequisites]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     if: ${{ needs.prerequisites.outputs.perform_release }}
