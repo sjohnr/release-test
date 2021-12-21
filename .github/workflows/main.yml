@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]    # Push to main branch
-#  schedule:
-#    - cron: '0 10 * * *'  # Once per day at 10am UTC
+    branches: [ '**' ]    # Push to main branch
+  schedule:
+    - cron: '0 10 * * *'  # Once per day at 10am UTC
   workflow_dispatch:      # Manual trigger
 
 env:
