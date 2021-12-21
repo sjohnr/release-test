@@ -2,18 +2,50 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
-#    tags: [ .* ]
-#  pull_request:
-#    branches: [ main ]
-  workflow_dispatch:
+    branches: [ .* ]      # Push to any branch
+  schedule:
+    - cron: '0 10 * * *'  # Once per day at 10am UTC
+  workflow_dispatch:      # Manual trigger
+
+env:
+  RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
 
 jobs:
+  prerequisites:
+    name: Pre-requisites for building
+    runs-on: ubuntu-latest
+    outputs:
+      runjobs: ${{ steps.continue.outputs.runjobs }}
+      project_version: ${{ steps.continue.outputs.project_version }}
+      perform_release: ${{ steps.continue.outputs.perform_release }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: continue
+        name: Determine if should continue
+        if: ${{ env.RUN_JOBS }}
+        run: |
+          # Run jobs if in upstream repository
+          echo "Setting runjobs=true"
+          echo "::set-output name=runjobs::true"
+          # Extract version from gradle.properties
+          version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
+          echo "Setting project_version=$version"
+          echo "::set-output name=project_version::$version"
+          # Perform release tasks if not "-SNAPSHOT"
+          if [[ "$version" != *"-SNAPSHOT" ]]
+          then
+            echo "Setting perform_release=true"
+            echo "::set-output name=perform_release::true"
+          fi
   build:
     name: Build
+    needs: [prerequisites]
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: ${{ github.repository == 'sjohnr/release-test' }}
+    if: ${{ needs.prerequisites.outputs.runjobs }}
+    env:
+      VERSION: ${{ needs.prerequisites.outputs.project_version }}
+      PERFORM_RELEASE: ${{ needs.prerequisites.outputs.perform_release }}
     steps:
       - uses: actions/checkout@v2
       - name: Build project
@@ -29,11 +61,18 @@ jobs:
         run: |
           echo "Setting env.perform_release=true"
           echo "perform_release=true" >> $GITHUB_ENV
+  release:
+    name: Perform Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: ${{ needs.prerequisites.outputs.perform_release }}
+    env:
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.ref_name }}
+      TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.prerequisites.outputs.project_version }}
+    steps:
       - name: Wait for Maven Artifacts
-        if: ${{ env.perform_release }}
-        env:
-          REPO: ${{ github.repository }}
-          VERSION: ${{ env.project_version }}
         run: |
           echo "Performing release of $REPO@$VERSION."
           until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
@@ -43,12 +82,6 @@ jobs:
           done
           echo "Artifacts for $REPO@$VERSION have been released to Maven Central."
       - name: Create GitHub Release
-        if: ${{ env.perform_release }}
-        env:
-          REPO: ${{ github.repository }}
-          BRANCH: ${{ github.ref_name }}
-          TOKEN: ${{ github.token }}
-          VERSION: ${{ env.project_version }}
         run: |
           echo "Tagging and publishing $REPO@$VERSION release to GitHub."
           echo "./gradlew createGitHubRelease -PnextVersion=$VERSION -Pbranch=$BRANCH -PcreateRelease=true -PgitHubAccessToken=$TOKEN"
