@@ -54,6 +54,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
@@ -79,6 +80,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
@@ -99,6 +101,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
@@ -119,6 +122,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
