@@ -132,7 +132,7 @@ jobs:
           echo "Deploying docs..."
           echo "./gradlew deployDocs"
   release:
-    name: Perform Release
+    name: Perform release
     needs: [prerequisites, build, test, deploy_artifacts, deploy_docs]
     runs-on: ubuntu-latest
     timeout-minutes: 90
