@@ -147,7 +147,7 @@ jobs:
             sleep 30
             echo "."
           done
-          echo "Artifacts for $REPO@$VERSION have been released to Maven Central."
+          echo "Artifacts for $REPO@$VERSION have been released to Spring Repo."
       - name: Wait for Maven Central Artifacts
         if: ${{ !contains(needs.prerequisites.outputs.project_version, '-RC') && !contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
