@@ -138,16 +138,16 @@ jobs:
       TOKEN: ${{ github.token }}
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
-      - name: Wait for Spring Repo Artifacts
+      - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
-          echo "Wait for artifacts of $REPO@$VERSION to appear on Spring Repo."
+          echo "Wait for artifacts of $REPO@$VERSION to appear on Artifactory."
           until curl -f -s https://repo.spring.io/ui/native/milestone/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
             echo "."
           done
-          echo "Artifacts for $REPO@$VERSION have been released to Spring Repo."
+          echo "Artifacts for $REPO@$VERSION have been released to Artifactory."
       - name: Wait for Maven Central Artifacts
         if: ${{ !contains(needs.prerequisites.outputs.project_version, '-RC') && !contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
