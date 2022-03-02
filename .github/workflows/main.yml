@@ -33,12 +33,6 @@ jobs:
           version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
           echo "Setting project_version=$version"
           echo "::set-output name=project_version::$version"
-          # Perform release tasks if not "-SNAPSHOT"
-          if [[ "$version" != *"-SNAPSHOT" ]]
-          then
-            echo "Setting perform_release=true"
-            echo "::set-output name=perform_release::true"
-          fi
   build:
     name: Build JDK 17
     needs: [prerequisites]
@@ -92,7 +86,7 @@ jobs:
           ./gradlew test --refresh-dependencies
   deploy_artifacts:
     name: Deploy artifacts
-    needs: [prerequisites, build, test]
+    needs: [build, test]
     runs-on: ubuntu-latest
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
@@ -113,7 +107,7 @@ jobs:
           echo "./gradlew publishArtifacts"
   deploy_docs:
     name: Deploy docs
-    needs: [prerequisites, build, test]
+    needs: [build, test]
     runs-on: ubuntu-latest
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
@@ -134,7 +128,7 @@ jobs:
           echo "./gradlew deployDocs"
   release:
     name: Perform release
-    needs: [prerequisites, build, test, deploy_artifacts, deploy_docs]
+    needs: [deploy_artifacts, deploy_docs]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     if: ${{ !endsWith(needs.prerequisites.outputs.project_version, '-SNAPSHOT') }}
