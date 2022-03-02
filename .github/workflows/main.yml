@@ -136,7 +136,7 @@ jobs:
     needs: [prerequisites, build, test, deploy_artifacts, deploy_docs]
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: ${{ needs.prerequisites.outputs.perform_release }}
+    if: ${{ !endsWith(needs.prerequisites.outputs.project_version, '-SNAPSHOT') }}
     env:
       REPO: ${{ github.repository }}
       BRANCH: ${{ github.ref_name }}
@@ -144,6 +144,7 @@ jobs:
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
       - name: Wait for Maven Artifacts
+        if: ${{ !contains(needs.prerequisites.outputs.project_version, '-RC') && !contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
           echo "Performing release of $REPO@$VERSION."
           until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
