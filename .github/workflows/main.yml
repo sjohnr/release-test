@@ -142,7 +142,7 @@ jobs:
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
           echo "Wait for artifacts of $REPO@$VERSION to appear on Artifactory."
-          until curl -f -s https://repo.spring.io/ui/native/milestone/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
+          until curl -f -s https://repo.spring.io/artifactory/milestone/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
             echo "."
