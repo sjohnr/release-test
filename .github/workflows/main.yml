@@ -86,7 +86,7 @@ jobs:
           ./gradlew test --refresh-dependencies
   deploy_artifacts:
     name: Deploy artifacts
-    needs: [build, test]
+    needs: [prerequisites, build, test]
     runs-on: ubuntu-latest
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
@@ -107,7 +107,7 @@ jobs:
           echo "./gradlew publishArtifacts"
   deploy_docs:
     name: Deploy docs
-    needs: [build, test]
+    needs: [prerequisites, build, test]
     runs-on: ubuntu-latest
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
@@ -128,7 +128,7 @@ jobs:
           echo "./gradlew deployDocs"
   release:
     name: Perform release
-    needs: [deploy_artifacts, deploy_docs]
+    needs: [prerequisites, deploy_artifacts, deploy_docs]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     if: ${{ !endsWith(needs.prerequisites.outputs.project_version, '-SNAPSHOT') }}
@@ -138,10 +138,20 @@ jobs:
       TOKEN: ${{ github.token }}
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
-      - name: Wait for Maven Artifacts
+      - name: Wait for Spring Repo Artifacts
+        if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
+        run: |
+          echo "Wait for artifacts of $REPO@$VERSION to appear on Spring Repo."
+          until curl -f -s https://repo.spring.io/ui/native/milestone/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
+          do
+            sleep 30
+            echo "."
+          done
+          echo "Artifacts for $REPO@$VERSION have been released to Maven Central."
+      - name: Wait for Maven Central Artifacts
         if: ${{ !contains(needs.prerequisites.outputs.project_version, '-RC') && !contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
-          echo "Performing release of $REPO@$VERSION."
+          echo "Wait for artifacts of $REPO@$VERSION to appear on Maven Central."
           until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
