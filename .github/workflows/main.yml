@@ -88,7 +88,6 @@ jobs:
     name: Deploy artifacts
     needs: [prerequisites, build, test]
     runs-on: ubuntu-latest
-    if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -109,7 +108,6 @@ jobs:
     name: Deploy docs
     needs: [prerequisites, build, test]
     runs-on: ubuntu-latest
-    if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
