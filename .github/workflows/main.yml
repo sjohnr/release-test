@@ -87,7 +87,7 @@ jobs:
           ./gradlew test --refresh-dependencies
   deploy_artifacts:
     name: Deploy artifacts
-    needs: [prerequisites, build, test]
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -107,7 +107,7 @@ jobs:
           echo "./gradlew publishArtifacts"
   deploy_docs:
     name: Deploy docs
-    needs: [prerequisites, build, test]
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -127,7 +127,7 @@ jobs:
           echo "./gradlew deployDocs"
   release:
     name: Perform release
-    needs: [prerequisites, deploy_artifacts, deploy_docs]
+    needs: [deploy_artifacts, deploy_docs]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     if: ${{ !endsWith(needs.prerequisites.outputs.project_version, '-SNAPSHOT') }}
