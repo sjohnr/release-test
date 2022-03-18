@@ -137,6 +137,7 @@ jobs:
       TOKEN: ${{ github.token }}
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
+      - uses: actions/checkout@v2
       - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
@@ -161,3 +162,10 @@ jobs:
         run: |
           echo "Tagging and publishing $REPO@$VERSION release to GitHub."
           echo "./gradlew createGitHubRelease -PnextVersion=$VERSION -Pbranch=$BRANCH -PcreateRelease=true -PgitHubAccessToken=$TOKEN"
+      - name: Update to Next Snapshot Version
+        run: |
+          echo "Updating $REPO@$VERSION to next snapshot version."
+          echo "./gradlew updateToSnapshotVersion -Pcommit=true"
+          sed -i "s/version=$VERSION/version=$VERSION-SNAPSHOT/" gradle.properties
+          git commit -am "Testing version update"
+          git push
