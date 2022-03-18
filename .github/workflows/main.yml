@@ -167,5 +167,7 @@ jobs:
           echo "Updating $REPO@$VERSION to next snapshot version."
           echo "./gradlew updateToSnapshotVersion -Pcommit=true"
           sed -i "s/version=$VERSION/version=$VERSION-SNAPSHOT/" gradle.properties
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
           git commit -am "Testing version update"
           git push
