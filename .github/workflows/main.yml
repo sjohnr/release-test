@@ -141,6 +141,7 @@ jobs:
       - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
+          apk add curl
           echo "Wait for artifacts of $REPO@$VERSION to appear on Artifactory."
           until curl -f -s https://repo.spring.io/artifactory/milestone/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
@@ -151,8 +152,9 @@ jobs:
       - name: Wait for Maven Central Artifacts
         if: ${{ !contains(needs.prerequisites.outputs.project_version, '-RC') && !contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
+          apk add curl
           echo "Wait for artifacts of $REPO@$VERSION to appear on Maven Central."
-          until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/
+          until curl -f -s https://repo1.maven.org/maven2/org/springframework/security/spring-security-core/$VERSION/ > /dev/null
           do
             sleep 30
             echo "."
