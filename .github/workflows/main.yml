@@ -47,14 +47,10 @@ jobs:
           distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Setup gradle user name
-        run: |
-          mkdir -p ~/.gradle
-          echo 'systemProp.user.name=spring-builds+github' >> ~/.gradle/gradle.properties
       - name: Build project
         run: |
           echo "Building project..."
-          ./gradlew printUserName clean build --continue
+          ./gradlew printUserName clean build --continue -Duser.name=spring-builds+github
   test:
     name: Test against snapshots
     needs: [prerequisites]
