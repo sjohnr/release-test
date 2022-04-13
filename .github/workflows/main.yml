@@ -72,6 +72,8 @@ jobs:
           distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
+        env:
+          GRADLE_USER_HOME: ~/.gradle
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
@@ -94,6 +96,8 @@ jobs:
           distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
+        env:
+          GRADLE_USER_HOME: ~/.gradle
       - name: Deploy artifacts
         run: |
           echo "Deploying artifacts..."
@@ -113,6 +117,8 @@ jobs:
           distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
+        env:
+          GRADLE_USER_HOME: ~/.gradle
       - name: Setup gradle user name
         run: |
           mkdir -p ~/.gradle
