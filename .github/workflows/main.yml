@@ -94,6 +94,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Setup gradle user name
+        run: |
+          mkdir -p ~/.gradle
+          echo 'systemProp.user.name=spring-builds+github' >> ~/.gradle/gradle.properties
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
         env:
