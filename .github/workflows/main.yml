@@ -98,7 +98,7 @@ jobs:
         run: |
           echo "Deploying artifacts..."
           echo "./gradlew publishArtifacts"
-          ./gradle printUserName
+          ./gradlew printUserName
   deploy_docs:
     name: Deploy docs
     needs: [build, test]
@@ -121,7 +121,7 @@ jobs:
         run: |
           echo "Deploying docs..."
           echo "./gradlew deployDocs"
-          ./gradle printUserName
+          ./gradlew printUserName
   release:
     name: Perform release
     needs: [prerequisites, deploy_artifacts, deploy_docs]
