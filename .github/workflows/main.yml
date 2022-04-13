@@ -54,7 +54,7 @@ jobs:
       - name: Build project
         run: |
           echo "Building project..."
-          ./gradlew clean build --continue
+          ./gradlew printUserName clean build --continue
   test:
     name: Test against snapshots
     needs: [prerequisites]

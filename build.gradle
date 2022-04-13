@@ -17,3 +17,10 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+task printUserName {
+    doLast {
+        println "**** User Name ****"
+        println System.getProperty("user.name")
+    }
+}
