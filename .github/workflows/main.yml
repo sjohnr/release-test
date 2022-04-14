@@ -53,6 +53,7 @@ jobs:
       - name: Build project
         run: |
           echo "Building project..."
+          export TEST_VAR="local value"
           ./gradlew printUserName printEnv clean build --continue -Duser.name=spring-builds+github
   test:
     name: Test against snapshots
