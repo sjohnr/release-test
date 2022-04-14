@@ -24,3 +24,10 @@ task printUserName {
         println System.getProperty("user.name")
     }
 }
+
+task printEnv {
+    doLast {
+        println "**** Env ****"
+        println property("TEST_VAR")
+    }
+}

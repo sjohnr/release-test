@@ -49,10 +49,11 @@ jobs:
         uses: gradle/gradle-build-action@v2
         env:
           GRADLE_USER_HOME: ~/.gradle
+          TEST_VAR: 'test value'
       - name: Build project
         run: |
           echo "Building project..."
-          ./gradlew printUserName clean build --continue -Duser.name=spring-builds+github
+          ./gradlew printUserName printEnv clean build --continue -Duser.name=spring-builds+github
   test:
     name: Test against snapshots
     needs: [prerequisites]
