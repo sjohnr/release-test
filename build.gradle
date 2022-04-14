@@ -29,6 +29,5 @@ task printEnv {
     doLast {
         println "**** Env ****"
         println System.getenv("TEST_VAR")
-        println System.getenv("GRADLE_USER_HOME")
     }
 }
