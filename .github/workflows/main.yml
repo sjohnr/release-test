@@ -8,8 +8,6 @@ on:
 
 env:
   RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
-  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   prerequisites:
@@ -18,7 +16,6 @@ jobs:
     outputs:
       runjobs: ${{ steps.continue.outputs.runjobs }}
       project_version: ${{ steps.continue.outputs.project_version }}
-      perform_release: ${{ steps.continue.outputs.perform_release }}
     steps:
       - uses: actions/checkout@v2
       - id: continue
@@ -37,8 +34,6 @@ jobs:
     needs: [prerequisites]
     runs-on: ubuntu-latest
     if: ${{ needs.prerequisites.outputs.runjobs }}
-    env:
-      TEST_VAR: 'global value'
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -47,16 +42,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Setup gradle user name
-        run: |
-          mkdir -p .gradle
-          echo 'systemProp.user.name=spring-builds+github' >> .gradle/gradle.properties
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Build project
         run: |
           echo "Building project..."
-          ./gradlew printUserName printEnv clean build --continue
+          ./gradlew clean build --continue -Duser.name=spring-builds+github
   test:
     name: Test against snapshots
     needs: [prerequisites]
@@ -72,8 +63,6 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        env:
-          GRADLE_USER_HOME: ~/.gradle
       - name: Run tests
         run: |
           echo "Running tests..."
@@ -90,19 +79,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Setup gradle user name
-        run: |
-          mkdir -p ~/.gradle
-          echo 'systemProp.user.name=spring-builds+github' >> ~/.gradle/gradle.properties
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        env:
-          GRADLE_USER_HOME: ~/.gradle
       - name: Deploy artifacts
         run: |
           echo "Deploying artifacts..."
           echo "./gradlew publishArtifacts"
-          ./gradlew printUserName
   deploy_docs:
     name: Deploy docs
     needs: [build, test]
@@ -117,17 +99,10 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        env:
-          GRADLE_USER_HOME: ~/.gradle
-      - name: Setup gradle user name
-        run: |
-          mkdir -p ~/.gradle
-          echo 'systemProp.user.name=spring-builds+github' >> ~/.gradle/gradle.properties
       - name: Deploy docs
         run: |
           echo "Deploying docs..."
           echo "./gradlew deployDocs"
-          ./gradlew printUserName
   release:
     name: Perform release
     needs: [prerequisites, deploy_artifacts, deploy_docs]
