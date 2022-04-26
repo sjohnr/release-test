@@ -117,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }} # TODO: Add GH_ACTIONS_REPO_TOKEN
+          token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
       - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
