@@ -40,7 +40,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Trigger release workflows
         run: |
-          ./gradlew triggerRelease -Pbranch=5.5.x -PgitHubAccessToken=$TOKEN
-          ./gradlew triggerRelease -Pbranch=5.6.x -PgitHubAccessToken=$TOKEN
-          ./gradlew triggerRelease -Pbranch=5.7.x -PgitHubAccessToken=$TOKEN
-          ./gradlew triggerRelease -Pbranch=main -PgitHubAccessToken=$TOKEN
+          ./gradlew triggerRelease -Pbranch=5.5.x -PgitHubAccessToken=$TOKEN && \
+            ./gradlew triggerRelease -Pbranch=5.6.x -PgitHubAccessToken=$TOKEN && \
+            ./gradlew triggerRelease -Pbranch=5.7.x -PgitHubAccessToken=$TOKEN && \
+            ./gradlew triggerRelease -Pbranch=main -PgitHubAccessToken=$TOKEN
