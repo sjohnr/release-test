@@ -1,10 +1,10 @@
-name: CI
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - '**'              # Push to main branch
-  workflow_dispatch:      # Manual trigger
+      - '**'
+  workflow_dispatch:
 
 env:
   RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
@@ -116,6 +116,8 @@ jobs:
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }} # TODO: Add GH_ACTIONS_REPO_TOKEN
       - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
