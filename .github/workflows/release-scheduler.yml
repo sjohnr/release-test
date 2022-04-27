@@ -27,7 +27,7 @@ jobs:
     name: Perform scheduled releases
     needs: [prerequisites]
     runs-on: ubuntu-latest
-    if: ${{ needs.prerequisites.outputs.runjobs && env.PERFORM_SCHEDULED_RELEASES == 'true' }}
+    if: ${{ needs.prerequisites.outputs.runjobs }}
     env:
       TOKEN: ${{ github.token }}
     steps:
@@ -40,6 +40,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
       - name: Trigger release workflows
+        if: ${{ env.PERFORM_SCHEDULED_RELEASES == 'true' }}
         run: |
           ./gradlew triggerRelease -Pbranch=main -PgitHubAccessToken=$TOKEN && \
             ./gradlew triggerRelease -Pbranch=5.7.x -PgitHubAccessToken=$TOKEN && \
