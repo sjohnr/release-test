@@ -10,8 +10,6 @@ on:
 
 env:
   RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
-  BUILD: true
-  TEST: true
   DEPLOY_ARTIFACTS: false
   DEPLOY_DOCS: false
   GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
@@ -51,7 +49,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: sjohnr/spring-gradle-build-action@v1
-        if: ${{ env.BUILD == 'true' }}
         with:
           java-version: ${{ matrix.jdk }}
           task: 'clean build'
@@ -64,7 +61,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: sjohnr/spring-gradle-build-action@v1
-        if: ${{ env.TEST == 'true' }}
         with:
           java-version: '17'
           task: 'test'
