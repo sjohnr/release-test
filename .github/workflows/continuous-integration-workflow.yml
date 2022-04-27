@@ -47,12 +47,16 @@ jobs:
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
       - uses: actions/checkout@v2
-      - uses: sjohnr/spring-gradle-build-action@v0.4
+      - uses: sjohnr/spring-gradle-build-action@v0.5
         if: ${{ env.BUILD == 'true' }}
         with:
           java-version: ${{ matrix.jdk }}
           task: 'clean build'
           args: '--continue -PartifactoryUsername="${{ secrets.ARTIFACTORY_USERNAME }}" -PartifactoryPassword="${{ secrets.ARTIFACTORY_PASSWORD }}"'
+        env:
+          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
+          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
   test:
     name: Test against snapshots
     needs: [prerequisites]
