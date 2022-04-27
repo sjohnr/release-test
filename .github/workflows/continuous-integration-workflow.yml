@@ -9,7 +9,6 @@ on:
   workflow_dispatch:
 
 env:
-  RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
   DEPLOY_ARTIFACTS: false
   DEPLOY_DOCS: false
   GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
@@ -20,6 +19,7 @@ jobs:
   prerequisites:
     name: Pre-requisites for building
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'sjohnr/release-test' }}
     outputs:
       runjobs: ${{ steps.continue.outputs.runjobs }}
       project_version: ${{ steps.continue.outputs.project_version }}
@@ -27,7 +27,6 @@ jobs:
       - uses: actions/checkout@v2
       - id: continue
         name: Determine if should continue
-        if: ${{ env.RUN_JOBS }}
         run: |
           # Run jobs if in upstream repository
           echo "Setting runjobs=true"
