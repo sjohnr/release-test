@@ -11,9 +11,12 @@ on:
 env:
   RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
   BUILD: true
-  TEST: false
+  TEST: true
   DEPLOY_ARTIFACTS: false
   DEPLOY_DOCS: false
+  GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
+  GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
+  GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
 
 jobs:
   prerequisites:
@@ -47,16 +50,12 @@ jobs:
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
       - uses: actions/checkout@v2
-      - uses: sjohnr/spring-gradle-build-action@v0.5
+      - uses: sjohnr/spring-gradle-build-action@v1
         if: ${{ env.BUILD == 'true' }}
         with:
           java-version: ${{ matrix.jdk }}
           task: 'clean build'
           args: '--continue -PartifactoryUsername="${{ secrets.ARTIFACTORY_USERNAME }}" -PartifactoryPassword="${{ secrets.ARTIFACTORY_PASSWORD }}"'
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
   test:
     name: Test against snapshots
     needs: [prerequisites]
@@ -64,74 +63,36 @@ jobs:
     if: ${{ needs.prerequisites.outputs.runjobs }}
     steps:
       - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+      - uses: sjohnr/spring-gradle-build-action@v1
+        if: ${{ env.TEST == 'true' }}
         with:
           java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      - name: Run tests
-        if: ${{ env.TEST == 'true' }}
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-        run: ./gradlew test --refresh-dependencies -Duser.name=spring-builds+github -PartifactoryUsername="$ARTIFACTORY_USERNAME" -PartifactoryPassword="$ARTIFACTORY_PASSWORD" -PforceMavenRepositories=snapshot -PspringFrameworkVersion='5.3.+' -PspringSecurityVersion='5.5.+' -PlocksDisabled --stacktrace
+          task: 'test'
+          args: '--refresh-dependencies -Duser.name=spring-builds+github -PartifactoryUsername="{{ secrets.ARTIFACTORY_USERNAME }}" -PartifactoryPassword="{{ secrets.ARTIFACTORY_PASSWORD }}" -PforceMavenRepositories=snapshot -PspringFrameworkVersion="5.3.+" -PspringSecurityVersion="5.5.+" --stacktrace'
   deploy_artifacts:
     name: Deploy artifacts
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+      - uses: sjohnr/spring-gradle-build-action@v1
+        if: ${{ env.DEPLOY_ARTIFACTS == 'true' }}
         with:
           java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      - name: Deploy artifacts
-        if: ${{ env.DEPLOY_ARTIFACTS == 'true' }}
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
-          OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_S01_TOKEN_USERNAME }}
-          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_S01_TOKEN_PASSWORD }}
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-        run: ./gradlew publishArtifacts finalizeDeployArtifacts -Duser.name=spring-builds+github -PossrhUsername="$OSSRH_TOKEN_USERNAME" -PossrhPassword="$OSSRH_TOKEN_PASSWORD" -PartifactoryUsername="$ARTIFACTORY_USERNAME" -PartifactoryPassword="$ARTIFACTORY_PASSWORD" --stacktrace
+          task: 'publishArtifacts finalizeDeployArtifacts'
+          args: '-PossrhUsername="{{ secrets.OSSRH_TOKEN_USERNAME }}" -PossrhPassword="{{ secrets.OSSRH_TOKEN_PASSWORD }}" -PartifactoryUsername="{{ secrets.ARTIFACTORY_USERNAME }}" -PartifactoryPassword="{{ secrets.ARTIFACTORY_PASSWORD }}" -PsigningKey="${{ secrets.GPG_PRIVATE_KEY }}" -PsigningPassword="${{ secrets.GPG_PASSPHRASE }}" --stacktrace'
   deploy_docs:
     name: Deploy docs
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+      - uses: sjohnr/spring-gradle-build-action@v1
+        if: ${{ env.DEPLOY_DOCS == 'true' }}
         with:
           java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      - name: Deploy docs
-        if: ${{ env.DEPLOY_DOCS == 'true' }}
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-          DOCS_USERNAME: ${{ secrets.DOCS_USERNAME }}
-          DOCS_SSH_KEY: ${{ secrets.DOCS_SSH_KEY }}
-          DOCS_HOST: ${{ secrets.DOCS_HOST }}
-        run: ./gradlew deployDocs -Duser.name=spring-builds+github -PdeployDocsSshKey="$DOCS_SSH_KEY" -PdeployDocsSshUsername="$DOCS_USERNAME" -PdeployDocsHost="$DOCS_HOST" --stacktrace
+          task: 'deployDocs'
+          args: '-PdeployDocsSshKey="{{ secrets.DOCS_SSH_KEY }}" -PdeployDocsSshUsername="{{ secrets.DOCS_USERNAME }}" -PdeployDocsHost="{{ secrets.DOCS_HOST }}" --stacktrace'
   release:
     name: Perform release
     needs: [prerequisites, deploy_artifacts, deploy_docs]
@@ -141,19 +102,11 @@ jobs:
     env:
       REPO: ${{ github.repository }}
       BRANCH: ${{ github.ref_name }}
-      TOKEN: ${{ github.token }}
       VERSION: ${{ needs.prerequisites.outputs.project_version }}
     steps:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
       - name: Wait for Artifactory Artifacts
         if: ${{ contains(needs.prerequisites.outputs.project_version, '-RC') || contains(needs.prerequisites.outputs.project_version, '-M') }}
         run: |
@@ -175,25 +128,23 @@ jobs:
           done
           echo "Artifacts for $REPO@$VERSION have been released to Maven Central."
       - name: Create GitHub Release
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-        run: |
-          echo "Tagging and publishing $REPO@$VERSION release to GitHub."
-          ./gradlew createGitHubRelease -PnextVersion=$VERSION -Pbranch=$BRANCH -PcreateRelease=true -PgitHubAccessToken=$TOKEN -Duser.name=spring-builds+github
-      - name: Setup git config
+        uses: sjohnr/spring-gradle-build-action@v1
+        with:
+          java-version: '17'
+          task: 'createGitHubRelease'
+          args: '-PnextVersion="${{ needs.prerequisites.outputs.project_version }}" -Pbranch="${{ github.ref_name }}" -PcreateRelease=true -PgitHubAccessToken="${{ github.token }}"'
+      - name: Update to Next Snapshot Version
+        uses: sjohnr/spring-gradle-build-action@v1
+        with:
+          java-version: '17'
+          task: 'updateToSnapshotVersion'
+          args: '-Pcommit=true'
+      - name: Set up git config
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-      - name: Update to Next Snapshot Version
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+      - name: Push development version
         run: |
-          echo "Updating $REPO@$VERSION to next snapshot version."
-          ./gradlew updateToSnapshotVersion -Pcommit=true -Duser.name=spring-builds+github
           #sed -i "s/version=$VERSION/version=$VERSION-SNAPSHOT/" gradle.properties
           git commit -am "Next development version"
           git push
