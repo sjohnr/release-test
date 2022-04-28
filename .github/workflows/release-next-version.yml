@@ -1,16 +1,83 @@
-name: Release
+name: Release Next Version
 
 on:
   workflow_dispatch:
 
 jobs:
-  release:
+  prerequisites:
+    name: Pre-requisites for building
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'sjohnr/release-test' }}
+    outputs:
+      runjobs: ${{ steps.continue.outputs.runjobs }}
+      project_version: ${{ steps.continue.outputs.project_version }}
     steps:
       - uses: actions/checkout@v2
-      - name: perform-release
+      - id: continue
+        name: Determine if should continue
         run: |
-          if [ "$((($(date +%e) - 1) / 7 + 1))" = "3" ] && [ "$(date +%A)" = "Monday" ]
-          then
-            echo "It is the third Monday of the month."
-          fi
+          # Run jobs if in upstream repository
+          echo "Setting runjobs=true"
+          echo "::set-output name=runjobs::true"
+          # Extract version from gradle.properties
+          version=$(cat gradle.properties | grep "version=" | awk -F'=' '{print $2}')
+          echo "Setting project_version=$version"
+          echo "::set-output name=project_version::$version"
+  release:
+    name: Release next version
+    needs: [prerequisites]
+    runs-on: ubuntu-latest
+    if: ${{ endsWith(needs.prerequisites.outputs.project_version, '-SNAPSHOT') }}
+    env:
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.ref_name }}
+      TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+      - id: calculate-next-version
+        name: Calculate next release version
+        run: |
+          version=${{ needs.prerequisites.outputs.project_version }}
+          nextVersion=$(./gradlew -q getNextReleaseMilestone -PgitHubAccessToken=$TOKEN)
+          echo "::set-output name=next_version::$nextVersion"
+      - id: check-release-due
+        name: Check release due
+        run: |
+          nextVersion=${{ steps.calculate-next-version.outputs.next_version }}
+          isDueToday=$(./gradlew -q checkIsMilestoneDueToday -PnextVersion=$nextVersion -PgitHubAccessToken=$TOKEN)
+          echo "::set-output name=is_due_today::$isDueToday"
+      - id: check-open-issues
+        name: Check for open issues
+        if: ${{ steps.check-release-due.outputs.is_due_today == 'true' }}
+        run: |
+          nextVersion=${{ steps.calculate-next-version.outputs.next_version }}
+          hasNoOpenIssues=$(./gradlew -q checkMilestoneHasNoOpenIssues -PnextVersion=$nextVersion -PgitHubAccessToken=$TOKEN)
+          echo "::set-output name=has_no_open_issues::$hasNoOpenIssues"
+      - id: validate-release-state
+        name: Validate state of release
+        if: ${{ steps.check-release-due.outputs.is_due_today == 'true' && steps.check-open-issues.outputs.has_no_open_issues == 'false' }}
+        run: |
+          echo "The release is due today but there are open issues"
+          exit 1
+      - id: update-version-and-push
+        name: Update version and push
+        if: ${{ steps.check-release-due.outputs.is_due_today == 'true' && steps.check-open-issues.outputs.has_no_open_issues == 'true' }}
+        run: |
+          version=${{ needs.prerequisites.outputs.project_version }}
+          nextVersion=${{ steps.calculate-next-version.outputs.next_version }}
+          sed -i "s/version=$version/version=$nextVersion/" gradle.properties
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -am "Release $nextVersion"
+          git tag $nextVersion
+          git push
+          git push origin $nextVersion
