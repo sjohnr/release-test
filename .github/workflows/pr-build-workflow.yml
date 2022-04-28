@@ -2,14 +2,11 @@ name: PR build
 
 on: pull_request
 
-env:
-  RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
-
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: ${{ env.RUN_JOBS == 'true' }}
+    if: ${{ github.repository == 'sjohnr/release-test' }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
