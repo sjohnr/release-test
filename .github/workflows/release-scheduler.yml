@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 env:
-  RUN_JOBS: ${{ github.repository == 'sjohnr/release-test' }}
   PERFORM_SCHEDULED_RELEASES: false
 
 jobs:
   prerequisites:
     name: Pre-requisites for building
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'sjohnr/release-test' }}
     outputs:
       runjobs: ${{ steps.continue.outputs.runjobs }}
     steps:
