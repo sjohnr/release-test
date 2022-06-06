@@ -19,4 +19,4 @@ jobs:
     if: failure()
     steps:
       - name: Send notification
-        run: echo "${{ github.event.toString() }}"
+        run: echo "${{ github.workflow }} / ${{ github.event.head_commit.author }}"
