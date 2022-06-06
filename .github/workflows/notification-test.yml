@@ -1,0 +1,22 @@
+name: Notification test
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  test_step:
+    name: 'Test step'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Test" && exit 1
+  notify:
+    name: Check for failures
+    runs-on: ubuntu-latest
+    needs: [test_step]
+    if: failure()
+    steps:
+      - name: Send notification
+        run: echo ${{ JSON.stringify(github.event) }}
