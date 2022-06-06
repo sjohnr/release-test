@@ -19,4 +19,4 @@ jobs:
     if: failure()
     steps:
       - name: Send notification
-        run: echo "${{ github.event }}"
+        run: echo "${{ github.event.toString() }}"
