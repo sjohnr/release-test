@@ -20,4 +20,4 @@ jobs:
     steps:
       - name: Send notification
         run: |
-          echo "Failed ${{ github.event.head_commit.author.name }}'s ${{ github.event_name}} on ${{ github.ref_name }}\nWorkflow: ${{ github.workflow }} <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+          echo "Failed: ${{ github.actor }}'s `${{ github.event_name}}` on `${{ github.ref_name }}`\nWorkflow: ${{ github.workflow }} <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}> completed in ...\n${{ github.event_path }}"
