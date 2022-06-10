@@ -17,7 +17,20 @@ jobs:
         with:
           # channel: '#spring-security-team'
           channel-id: 'G9B4T6XHN'
-          slack-message: 'spring-security-announcing `0.0.0` is available (this is a test)'
+          payload: |
+            {
+              "text": "spring-security-announcing `0.0.0` is available (this is a test)",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "spring-security-announcing `0.0.0` is available (this is a test)"
+                  }
+                }
+              ]
+            }
+          #slack-message: 'spring-security-announcing `0.0.0` is available (this is a test)'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
