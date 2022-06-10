@@ -15,8 +15,6 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.19.0
         with:
-          # channel: '#spring-security-team'
-          channel-id: 'G9B4T6XHN'
           payload: |
             {
               "text": "spring-security-announcing `0.0.0` is available (this is a test)",
